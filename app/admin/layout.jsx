@@ -7,7 +7,7 @@ export default function Layout({ children }) {
   return (
     <div className="flex h-screen">
       {/* Sidebar */}
-      <ToastContainer theme="dakl"/>
+      <ToastContainer theme="dark"/>
       <Sidebar />
 
       {/* Right Content */}

@@ -1,28 +1,30 @@
 'use client'
 
-import { assets } from '@/Assets/assets'
-import axios from 'axios'
-import Image from 'next/image'
-import React, { useState } from 'react'
-import { toast } from 'react-toastify'
+import { assets } from '@/Assets/assets';
+import axios from 'axios';
+import Image from 'next/image';
+import React, { useState } from 'react';
+import { toast } from 'react-toastify';
 
-const AddProductPage = () => {
+const page = () => {
   const [image, setImage] = useState(null);
   const [data, setData] = useState({
     title: '',
     description: '',
-    category: '',
+    category: 'Startup',
     author: 'Alex Bennet',
-    authorImg: '/author_img.png'
+    authorImg: '/author_img.png' // your asset image
   });
 
-  const onChangeHandler = (event) => {
-    const { name, value } = event.target;
+  const onChangeHandler = (e) => {
+    const { name, value } = e.target;
     setData(prev => ({ ...prev, [name]: value }));
   }
 
   const onSubmitHandler = async (e) => {
     e.preventDefault();
+
+    if (!image) return toast.error("Blog image is required");
 
     const formData = new FormData();
     formData.append("title", data.title);
@@ -30,22 +32,16 @@ const AddProductPage = () => {
     formData.append("category", data.category);
     formData.append("author", data.author);
     formData.append("authorImg", data.authorImg);
-    if (image) formData.append("image", image);
+    formData.append("image", image);
 
     try {
       const response = await axios.post("/api/blog", formData);
       if (response.data.success) {
         toast.success(response.data.msg);
-        setData({
-          title: '',
-          description: '',
-          category: 'Startup',
-          author: 'Alex Bennet',
-          authorImg: '/author_img.png'
-        });
+        setData({ title: '', description: '', category: 'Startup', author: 'Alex Bennet', authorImg: '/author_img.png' });
         setImage(null);
       } else {
-        toast.error(response.data.msg || "Error, something went wrong");
+        toast.error(response.data.msg || "Something went wrong");
       }
     } catch (err) {
       console.error("Axios POST error:", err);
@@ -55,51 +51,52 @@ const AddProductPage = () => {
 
   return (
     <form onSubmit={onSubmitHandler} className="pt-4 px-4 sm:pt-12 sm:pl-16">
-      <p className="text-xl">Upload Thumbnail</p>
+      <p className="text-xl">Upload Blog Thumbnail</p>
       <label htmlFor="image">
         <Image
-          className="mt-4"
-          src={!image ? assets.upload_area : URL.createObjectURL(image)}
+          className="mt-4 cursor-pointer"
+          src={image ? URL.createObjectURL(image) : assets.upload_area}
           width={130}
           height={70}
-          alt=""
+          alt="Blog Thumbnail"
         />
       </label>
       <input
-        onChange={(e) => setImage(e.target.files[0])}
         type="file"
         id="image"
         hidden
+        accept="image/*"
+        onChange={(e) => setImage(e.target.files[0])}
         required
       />
 
       <p className="text-xl mt-4">Blog Title</p>
       <input
-        name="title"
-        onChange={onChangeHandler}
-        value={data.title}
-        className="w-full sm:w-[500px] mt-4 px-4 py-3 border border-gray-300 rounded"
         type="text"
+        name="title"
+        value={data.title}
+        onChange={onChangeHandler}
         placeholder="Enter Blog Title"
+        className="w-full sm:w-[500px] mt-4 px-4 py-3 border rounded border-gray-300"
         required
       />
 
       <p className="text-xl mt-4">Blog Description</p>
       <textarea
         name="description"
-        onChange={onChangeHandler}
         value={data.description}
-        className="w-full sm:w-[500px] mt-4 px-4 py-3 border border-gray-300 rounded"
+        onChange={onChangeHandler}
         placeholder="Enter Blog Description"
+        className="w-full sm:w-[500px] mt-4 px-4 py-3 border rounded border-gray-300"
         required
       />
 
-      <p className="text-xl mt-4">Blog Category</p>
+      <p className="text-xl mt-4">Category</p>
       <select
-        onChange={onChangeHandler}
-        value={data.category}
-        className="w-40 mt-4 px-4 py-3 border border-gray-300 text-gray-500 rounded"
         name="category"
+        value={data.category}
+        onChange={onChangeHandler}
+        className="w-40 mt-4 px-4 py-3 border rounded border-gray-300"
       >
         <option value="Startup">Startup</option>
         <option value="Technology">Technology</option>
@@ -107,10 +104,11 @@ const AddProductPage = () => {
       </select>
 
       <br />
-
-      <button type="submit" className="mt-8 w-40 h-12 bg-black text-white">Add</button>
+      <button type="submit" className="mt-8 w-40 h-12 bg-black text-white">
+        Add Blog
+      </button>
     </form>
   )
 }
 
-export default AddProductPage;
+export default page;
